@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+venv/
+.venv/
+
+# Environment variables
+.env
+
+# ChromaDB
+chroma_db/
+
+# Uploaded files
+uploads/
+
+# Node
+node_modules/
+dist/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# IDE
+.vscode/
+
+# Large media files
+*.mp3
+*.mp4
+*.wav
+*.m4a
+*.mov
