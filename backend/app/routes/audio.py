@@ -3,18 +3,17 @@ import uuid
 
 from fastapi import APIRouter, File, UploadFile, HTTPException
 
-from app.services.pdf_service import extract_text_from_pdf
-from app.services.vector_service import add_pdf_chunks
+from app.services.audio_service import process_audio_file
 
 
 router = APIRouter(
-    prefix="/api/documents",
-    tags=["Documents"]
+    prefix="/api/audio",
+    tags=["Audio"]
 )
 
 
-@router.post("/upload")
-async def upload_document(
+@router.post("/process")
+async def process_audio(
     file: UploadFile = File(...)
 ):
 
@@ -24,10 +23,25 @@ async def upload_document(
             detail="No file was provided"
         )
 
-    if not file.filename.lower().endswith(".pdf"):
+    allowed_extensions = (
+        ".mp3",
+        ".wav",
+        ".m4a",
+        ".mp4",
+        ".mov",
+        ".webm"
+    )
+
+    if not file.filename.lower().endswith(
+        allowed_extensions
+    ):
         raise HTTPException(
             status_code=400,
-            detail="Only PDF files are supported"
+            detail=(
+                "Unsupported file type. "
+                "Supported formats: "
+                "MP3, WAV, M4A, MP4, MOV, WEBM"
+            )
         )
 
     upload_directory = "uploads"
@@ -59,28 +73,19 @@ async def upload_document(
                 file_content
             )
 
-        pages = extract_text_from_pdf(
-            file_path
+        result = process_audio_file(
+            file_path,
+            file.filename
         )
 
-        indexed_chunks = add_pdf_chunks(
-            file.filename,
-            pages
-        )
-
-        return {
-            "filename": file.filename,
-            "source_type": "pdf",
-            "indexed_chunks": indexed_chunks,
-            "pages": pages
-        }
+        return result
 
     except Exception as error:
 
         raise HTTPException(
             status_code=500,
             detail=(
-                f"Failed to process PDF: "
+                f"Audio processing failed: "
                 f"{str(error)}"
             )
         )
